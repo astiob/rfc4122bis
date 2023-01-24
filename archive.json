@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-01-22T01:44:45.902657+00:00",
+  "timestamp": "2023-01-24T01:40:44.981999+00:00",
   "repo": "ietf-wg-uuidrev/rfc4122bis",
   "labels": [
     {
@@ -257,7 +257,7 @@
       ],
       "body": "### Errata ID: [3546](https://www.rfc-editor.org/errata/eid3546)\r\n- Status: Held for Document Update\r\n- Type: Technical\r\n- Publication Format(s) : TEXT\r\n- Reported By: Askar Safin\r\n- Date Reported: 2013-03-14\r\n- Held for Document Update by: Barry Leiba\r\n- Date Held: 2013-03-20\r\n\r\n### Errata\r\nSection 4.1.3 says:\r\n\r\n```\r\nThe version number is in the most significant 4 bits of the time\r\nstamp (bits 4 through 7 of the time_hi_and_version field).\r\n```\r\n\r\nIt should say:\r\n\r\n```\r\nThe version number is in the most significant 4 bits of the time\r\nstamp (bits 0 through 3 of the time_hi_and_version field).\r\n```\r\n\r\n### Notes:\r\n\r\nWe use network order (as far as I know, we use network order in this RFC both for bits and bytes). So, the most significant bits comes first and they are located in first bytes. So, 0 through 3.\r\n\r\n### VERIFIER NOTES\r\nThis erratum is correct as far as it goes, but, given other text in the RFC, so is erratum 1957. There is a pervasive problem in this RFC with inconsistent and unclear usage of bit numbering, which switches between several conventions. The diagram in Section 4.1.2 uses left-to-right bit numbering (the most significant bit is numbered 0), but much of the text (such as in Section 4.2.2) uses right-to-left bit numbering (the least significant bit is numbered 0). Most of the text uses big-ending byte order (network byte order), but some seems to assume little-ending, probably mistakes that come from the authors' familiarity with that convention.\r\n\r\nWith respect to the text in question, the first sentence of Section 4.1.3, we have the following situation:\r\n\r\n- The original text is correct if we assume right-to-left bit numbering and little-endian byte order.\r\n\r\n- Erratum 1957 is correct if we assume right-to-left bit numbering and big-endian byte order. This change also makes the first sentence of Section 4.1.3 consistent with the sixth bullet in Section 4.2.2.\r\n\r\n- Erratum 3546 is correct if we assume left-to-right bit numbering and big-endian byte order.\r\n\r\nIn the end, the real point is that this document needs a revision that carefully and thoroughly fixes every instance of byte numbering (or removes the byte numbering and refers only to \"most significant\" and \"least significant\"). Such a revision should also double-check the sample code in Appendix A to be sure it works in both big-ending and little-endian machines.\r\n\r\nHappily, it's not likely that misunderstandings here will cause actual interoperability problems: this isn't a situation where things need to be disassembled and reassembled. The algorithm merely turns a UUID into a URN, and the URN is thereafter a \"black box\", an unchanged identifier. The only issue would be whether different interpretations of the document would turn two different UUIDs into the same URN, and, given the number of bits involved, the likelihood of collisions in practice is small.",
       "createdAt": "2022-10-03T23:21:07Z",
-      "updatedAt": "2023-01-20T15:30:17Z",
+      "updatedAt": "2023-01-23T23:18:56Z",
       "closedAt": null,
       "comments": [
         {
@@ -270,9 +270,9 @@
         {
           "author": "kyzer-davis",
           "authorAssociation": "COLLABORATOR",
-          "body": "> So, I'm sure this errata (regarding this paragraph) is fixed. Thanks a lot.\r\n\r\nThanks for the confirmation @safinaskar \r\n\r\n> Also, it seems bits and bytes numbers are zero-based. I don't see mentions of this starting from begin of this document through this paragraph\r\n\r\nI have this paragraph in Section 5 (being moved to section 4). I believe when moved to the correct spot this should address your concern.\r\n\r\n```\r\nWhile discussing UUID field layouts, bit definitions start at 0 and end at 127 while octets definitions start at 0 and end at 15.\r\n```\r\nSource, https://www.ietf.org/archive/id/draft-ietf-uuidrev-rfc4122bis-00.html#section-5\r\n",
+          "body": "> So, I'm sure this errata (regarding this paragraph) is fixed. Thanks a lot.\r\n\r\nThanks for the confirmation @safinaskar \r\n\r\n> Also, it seems bits and bytes numbers are zero-based. I don't see mentions of this starting from begin of this document through this paragraph\r\n\r\nI have this paragraph in Section 5 (being moved to section 4). I believe when moved to the correct spot this should address your concern.\r\n\r\n```\r\nWhile discussing UUID field layouts, bit definitions start at 0 and end at 127 while octets definitions start at 0 and end at 15.\r\n```\r\nEdit, https://www.ietf.org/archive/id/draft-ietf-uuidrev-rfc4122bis-01.html#name-uuid-format\r\n",
           "createdAt": "2023-01-20T15:30:17Z",
-          "updatedAt": "2023-01-20T15:30:17Z"
+          "updatedAt": "2023-01-23T23:18:56Z"
         }
       ]
     },
@@ -297,7 +297,7 @@
     {
       "number": 16,
       "id": "I_kwDOH6Ln3M5UioIX",
-      "title": "Reserve variant for Omni-UUID (Max-UUID)",
+      "title": "Draft 02: Describe Nil/Max UUID in variant table",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/16",
       "state": "OPEN",
       "author": "ben221199",
@@ -306,7 +306,7 @@
       "labels": [],
       "body": "At the moment, the Nil-UUID is part of variant 0 and by that definition reserved. Variant 0 uses `AF_UNSPEC` in that case.\r\n\r\nHowever, the range of the Omni-UUID isn't reserved yet. This issue suggests to reserve a variant of the Omni-UUID. I would suggest to only reserve the `0xFF` variant. Why? I will explain.\r\n\r\nIn the early days of UUID, there was no such thing as variants. There was only \"family\". This family field consisted of only one single byte, so it ranged from 0 to 255. In modern days, this is the same byte as where the variant byte is in. With this information, the new variant table will be this:\r\n| Msb0 | Msb1 | Msb2 | As Byte | Values | Description |\r\n| - | - | - | - | - | - |\r\n| 0 | * | * | `0b0*******` | From 0 to 127 | Reserved, NCS backward compatibility. |\r\n| 1 | 0 | * | `0b10******` | From 128 to 191 | The variant specified in this document. |\r\n| 1 | 1 | 0 | `0b110*****` | From 192 to 223 | Reserved, Microsoft Corporation backward compatibility |\r\n| 1 | 1 | 1 | `0b111*****`<br>---<br>`0b11111111` | From 224 to 254<br>---<br>Only 255 | Reserved for future definition.<br>---<br>Omni-UUID variant |\r\n\r\nHandling the variant/family like this, it has at least 2 advantages:\r\n - It reserves a variant for the Omni-UUID, so that there will be no conflicts when a new variant will be specificed.\r\n - You clearly see that there are 31 variant slots open for definition (32 including Omni-UUID variant).\r\n\r\nThis doesn't mean that Variant 255 always should have all bits set to 1. It only reserves the range the Omni-UUID is in. I also think it is important to add this variant in this specification, because this specification defines the Omni-UUID itself.",
       "createdAt": "2022-10-21T13:41:59Z",
-      "updatedAt": "2023-01-21T15:01:10Z",
+      "updatedAt": "2023-01-23T23:44:12Z",
       "closedAt": null,
       "comments": [
         {
@@ -392,6 +392,13 @@
           "body": "Seems to me a reasonable solution for now. It reserves the range where Omni-UUID is in for later definition, but also already tells to take into account having a variant for it in the future.\r\n\r\nOne addition: It seems the RFC at the moment will only documentate variant 1 (and its subversions). Maybe it is also good to documentate variant 0 (and its subfamilies). Because variant 0 family 0 is `af_unspec`, it is compatible with old specifications to documentate variant 0 and also include Nil-UUID:\r\n![image](https://user-images.githubusercontent.com/12856904/213872412-1e3732f8-fe84-4f6b-82aa-63fc56adb639.png)\r\n```\r\n *\r\n * Internal structure of variant #0 UUIDs\r\n *\r\n * The first 6 octets are the number of 4 usec units of time that have\r\n * passed since 1/1/80 0000 GMT.  The next 2 octets are reserved for\r\n * future use.  The next octet is an address family.  The next 7 octets\r\n * are a host ID in the form allowed by the specified address family.\r\n *\r\n * Note that while the family field (octet 8) was originally conceived\r\n * of as being able to hold values in the range [0..255], only [0..13]\r\n * were ever used.  Thus, the 2 MSB of this field are always 0 and are\r\n * used to distinguish old and current UUID forms.\r\n *\r\n * +--------------------------------------------------------------+\r\n * |                    high 32 bits of time                      |  0-3  .time_high\r\n * +-------------------------------+-------------------------------\r\n * |     low 16 bits of time       |  4-5               .time_low\r\n * +-------+-----------------------+\r\n * |         reserved              |  6-7               .reserved\r\n * +---------------+---------------+\r\n * |    family     |   8                                .family\r\n * +---------------+----------...-----+\r\n * |            node ID               |  9-16           .node\r\n * +--------------------------...-----+\r\n *\r\n */\r\n```\r\nSource: https://opensource.apple.com/source/CF/CF-299.35/Base.subproj/uuid.c.auto.html\r\n\r\nSo, for Nil-UUID:\r\n - All `time` bits are zero\r\n - All `reserved` bits are zero by definition\r\n - All `family` bits are zero. The first bit tells us it is variant 0; in combination with the other 7 bits, we also know the family: `AF_UNSPEC`. Because the family is `UNSPEC`, we don't have to follow any family format rules.\r\n - All `node ID` bits are zero.\r\n\r\nThen, we can change the description text for variant zero to:\r\n`Apollo NCS format [Section x.x], including Nil-UUID [Section y.y].`",
           "createdAt": "2023-01-21T15:01:09Z",
           "updatedAt": "2023-01-21T15:01:09Z"
+        },
+        {
+          "author": "kyzer-davis",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@ben221199, maybe I can sneak Variant 0 and its sub-families into an appendix or I could link that source exactly as a reference.\r\nI would hate to add technical information we are not fully in control of. Basically treat it like UUIDv2m \"out of our control go to this doc to read about it.\" and insert the source.",
+          "createdAt": "2023-01-23T21:12:35Z",
+          "updatedAt": "2023-01-23T21:12:35Z"
         }
       ]
     },
@@ -745,17 +752,17 @@
       "id": "I_kwDOH6Ln3M5cYFQq",
       "title": "Create better ABNF to represent Hex Digit",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/39",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cabo",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [
-        "Consensus Requested"
+        "Consensus Acheived"
       ],
       "body": "Please use a more common form of identifying hexdigit in the IETF.\r\n\r\nCertainly\r\n\r\n```\r\nhexDigit =\r\n      \"0\" / \"1\" / \"2\" / \"3\" / \"4\" / \"5\" / \"6\" / \"7\" / \"8\" / \"9\" /\r\n      \"a\" / \"b\" / \"c\" / \"d\" / \"e\" / \"f\" /\r\n      \"A\" / \"B\" / \"C\" / \"D\" / \"E\" / \"F\"\r\n[\u00b6](https://ietf-wg-uuidrev.github.io/rfc4122bis/draft-00/draft-ietf-uuidrev-rfc4122bis.html#appendix-A-2.8.5)\r\n``` \r\n\r\nis suboptimal as both \"a\" and \"A\" identify a case-insensitive letter A.\r\n\r\nE.g.:\r\n``` \r\n   hexDigit = DIGIT / \"A\" / \"B\" / \"C\" / \"D\" / \"E\" / \"F\"\r\n``` \r\n\r\nOr use the % form:\r\n\r\n``` \r\n   DIGIT           = %x30-39\r\n   hexDigit      = DIGIT / %x61-66 / %x41-47\r\n```\r\n\r\n",
       "createdAt": "2023-01-19T19:28:27Z",
-      "updatedAt": "2023-01-20T17:10:06Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-23T22:55:18Z",
+      "closedAt": "2023-01-23T22:55:18Z",
       "comments": [
         {
           "author": "kyzer-davis",
@@ -796,7 +803,7 @@
       "id": "I_kwDOH6Ln3M5cdKtU",
       "title": "Move octet text from section 4 to section 5",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/41",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kyzer-davis",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -805,8 +812,8 @@
       ],
       "body": "Jim:\r\n> Section 4.1: \"octet 8\" is the first mention of an octet number. Should\r\nsomething be said about octet numbering first? For example, most significant octet first, starting with 0\r\n\r\nKyzer:\r\n> Yes, I noticed this myself, I have text in Section 5.0 start that defines the start of octet descriptors. I will open an issue to move this to section 4.0. ",
       "createdAt": "2023-01-20T16:39:35Z",
-      "updatedAt": "2023-01-20T18:51:13Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-23T22:55:04Z",
+      "closedAt": "2023-01-23T22:55:04Z",
       "comments": []
     },
     {
@@ -814,7 +821,7 @@
       "id": "I_kwDOH6Ln3M5cdK4L",
       "title": "Add forward reference to UUIDv1 and UUIDv4 in Section 2",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/42",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kyzer-davis",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -823,8 +830,8 @@
       ],
       "body": "Jim:\r\n\r\n> Section 2: UUIDv4 (item 1) and UUIDv1 (item 2) references: Should \r\n> these be forward references to later sections of the document?\r\n\r\nKyzer:\r\n> Yes, that is likely a good thing to do. I used v1 and v4 for those Section 2 examples since they are \"very well known\" so I opted to use them to hammer home the finer UUID structure details. I will open an issue to track this.",
       "createdAt": "2023-01-20T16:40:16Z",
-      "updatedAt": "2023-01-20T18:52:53Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-23T22:55:04Z",
+      "closedAt": "2023-01-23T22:55:04Z",
       "comments": []
     },
     {
@@ -846,7 +853,7 @@
     {
       "number": 44,
       "id": "I_kwDOH6Ln3M5cdMNu",
-      "title": "Draft 02: Expand upon why unix epoch is not a problem",
+      "title": "Draft 02: Expand upon why unix epoch rollover is not a problem",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/44",
       "state": "OPEN",
       "author": "kyzer-davis",
@@ -855,7 +862,7 @@
       "labels": [],
       "body": "Jim:\r\n> Section 6.1: Length: Perhaps directly address why the Unix epoch \r\n> rollover is not a concern here.",
       "createdAt": "2023-01-20T16:44:29Z",
-      "updatedAt": "2023-01-20T18:44:14Z",
+      "updatedAt": "2023-01-23T23:11:34Z",
       "closedAt": null,
       "comments": []
     },
@@ -864,7 +871,7 @@
       "id": "I_kwDOH6Ln3M5cdMgA",
       "title": "Erronous reference to v1 in monotonicity",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/45",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kyzer-davis",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -873,8 +880,8 @@
       ],
       "body": "Jim:\r\n> Section 6.2: In paragraph 3, it refers to monotonicity of UUID version 1.\r\n> But version 1 is not monotonic at a high level because the byte order is wrong, so it will not be seen by applications not explicitly looking at the version field as monotonic. It might be good to point that out, especially since this is one of the motivations for the new UUID versions.\r\n\r\nKyzer:\r\n> Yes, I will open a tracker item to remove version 1 from that sentence.",
       "createdAt": "2023-01-20T16:45:20Z",
-      "updatedAt": "2023-01-20T18:45:51Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-23T22:55:05Z",
+      "closedAt": "2023-01-23T22:55:05Z",
       "comments": []
     },
     {
@@ -882,7 +889,7 @@
       "id": "I_kwDOH6Ln3M5cdMpZ",
       "title": "Add Label for \"Monotonic Error Checking\" paragraph to frame the topic",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/46",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kyzer-davis",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -891,8 +898,8 @@
       ],
       "body": "Jim\r\n> Section 6.2, last sentence: I don't understand this.\r\n\r\nKyzer:\r\n> General guidance on error checking e.g. \"is our current UUID larger than the previous\". If it makes more sense, I can open an issue to give it a label of \"Monotonic Error Checking\" like we have with the rest of the items in that section.",
       "createdAt": "2023-01-20T16:45:50Z",
-      "updatedAt": "2023-01-20T18:45:43Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-23T22:55:05Z",
+      "closedAt": "2023-01-23T22:55:05Z",
       "comments": []
     },
     {
@@ -916,7 +923,7 @@
       "id": "I_kwDOH6Ln3M5cdNhb",
       "title": "Remove IEEE paragraph from \"uuids that do not identify the host\"",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/48",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kyzer-davis",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -925,8 +932,8 @@
       ],
       "body": "As per Jim not required in this document since we are discouraging centralized registries and IEEE mac addresses.\r\n> One approach is to contact the IEEE and get a separate block of addresses. At the time of writing, the application could be found at https://standards.ieee.org/products-programs/regauth/.",
       "createdAt": "2023-01-20T16:48:31Z",
-      "updatedAt": "2023-01-20T18:51:58Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-23T22:55:05Z",
+      "closedAt": "2023-01-23T22:55:05Z",
       "comments": []
     },
     {
@@ -1017,7 +1024,7 @@
       "labels": [],
       "body": "We have DNS, URL, OID, and X500 as per RFC4122: https://www.rfc-editor.org/rfc/rfc4122#appendix-C\r\n\r\n```\r\nDNS  = 6ba7b810-9dad-11d1-80b4-00c04fd430c8\r\nURL  = 6ba7b811-9dad-11d1-80b4-00c04fd430c8\r\nOID  = 6ba7b812-9dad-11d1-80b4-00c04fd430c8\r\nX500 = 6ba7b814-9dad-11d1-80b4-00c04fd430c8\r\n```\r\n\r\nThese are basically \"special case\" UUIDv1 values incremented at the last octet of the `time_low`.\r\nSee: https://stackoverflow.com/questions/7724903/where-do-uuid-namespaces-come-from\r\n\r\nFrom what I can see UUIDv3 and UUIDv5 Libraries will only implement what we define in the spec and do not allow for any inputs other than these four.\r\n\r\nSome common use cases that come to mind for UUIDs where a \"namespace\" may need to be defined are:\r\n- IOT applications\r\n- Database applications\r\n\r\nDoes it make sense to add the following by incrementing to `6ba7b814` to `6ba7b815` and `6ba7b816`\r\n```\r\nIOT = 6ba7b815-9dad-11d1-80b4-00c04fd430c8\r\nDB  = 6ba7b816-9dad-11d1-80b4-00c04fd430c8\r\n```",
       "createdAt": "2023-01-20T19:05:39Z",
-      "updatedAt": "2023-01-21T01:28:20Z",
+      "updatedAt": "2023-01-23T21:09:15Z",
       "closedAt": null,
       "comments": [
         {
@@ -1026,8 +1033,63 @@
           "body": "A little bit confused because IOT or DB doesn't look like a \"namespace\" (neither does X500 though). I think each IOT/DB/whatever application should generate a UUID and use it as its own application-specific namespace ID. For example:\r\n\r\n```python\r\nDB_APP_A_USER_ID_SPACE = \"c8158cdd-8ad5-477c-ab51-57703a54d286\"  # v4 I made up just now\r\nDB_APP_B_USER_ID_SPACE = \"a79c6917-619f-4e8c-abcf-170a6116878d\"  # ditto\r\n\r\nuuidv5_a = gen_uuidv5(name_space_id=DB_APP_A_USER_ID_SPACE, name=\"LiosK\")\r\nuuidv5_b = gen_uuidv5(name_space_id=DB_APP_B_USER_ID_SPACE, name=\"LiosK\")\r\n```\r\n\r\nA predefined namespace ID that might be shared by multiple applications/namespaces doesn't seem useful here.",
           "createdAt": "2023-01-21T01:28:20Z",
           "updatedAt": "2023-01-21T01:28:20Z"
+        },
+        {
+          "author": "kyzer-davis",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@LiosK, while that should be true, the point I was making is that almost no library implements a \"generic enter your own namespace\" option. Where most are hardcoded to whatever is in RFC4122.\r\n\r\nThis at least gives a few more options, although probably not needed at all. I just wanted to at least bring it up while revising the spec.",
+          "createdAt": "2023-01-23T21:09:15Z",
+          "updatedAt": "2023-01-23T21:09:15Z"
         }
       ]
+    },
+    {
+      "number": 55,
+      "id": "I_kwDOH6Ln3M5coA9o",
+      "title": "Draft 02: Appendix B, consistent naming",
+      "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/55",
+      "state": "OPEN",
+      "author": "kyzer-davis",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Need to change to \"Example of a UUIDvX Value\" some are missing an A\r\n```\r\nAppendix B.  Test Vectors\r\nB.1.  Example of UUIDv1 Value\r\nB.2.  Example of UUIDv3 Value\r\nB.3.  Example of UUIDv4 Value\r\nB.4.  Example of UUIDv5 Value\r\nB.5.  Example of a UUIDv6 Value\r\nB.6.  Example of a UUIDv7 Value\r\nB.7.  Example of a UUIDv8 Value\r\n```\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+      "createdAt": "2023-01-23T23:25:49Z",
+      "updatedAt": "2023-01-23T23:25:49Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 56,
+      "id": "I_kwDOH6Ln3M5coBUM",
+      "title": "Draft 02: Remove duplicate ABNF from IANA considerations",
+      "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/56",
+      "state": "OPEN",
+      "author": "kyzer-davis",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I thought I did this in Draft 01 but I believe I stashed my changes while fixing some merge conflicts. \r\nIANA ABNF should just refer to section 4 ABNF and we can reduce some verbiage in that template as per January Interim meeting.",
+      "createdAt": "2023-01-23T23:27:45Z",
+      "updatedAt": "2023-01-23T23:27:45Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 57,
+      "id": "I_kwDOH6Ln3M5coCjC",
+      "title": "Draft 02: Monotonic Error Checking missing newline",
+      "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/57",
+      "state": "OPEN",
+      "author": "kyzer-davis",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Markdown template is wrong, newline is missing to match the other min-sections styled in a specific way within this section.",
+      "createdAt": "2023-01-23T23:34:47Z",
+      "updatedAt": "2023-01-23T23:35:27Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -1446,24 +1508,26 @@
       "id": "PR_kwDOH6Ln3M5IPPUU",
       "title": "Draft 01 - Merge 2",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/pull/54",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "kyzer-davis",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "- Closes #41\r\n- Closes #42\r\n- Closes #45 \r\n- Closes #46 \r\n- Closes #48\r\n- Added .txt and .html files.\r\n- Removed TODO labels\r\n- Added Draft 01 Changelog",
       "createdAt": "2023-01-20T19:09:04Z",
-      "updatedAt": "2023-01-20T19:13:32Z",
+      "updatedAt": "2023-01-23T23:29:09Z",
       "baseRepository": "ietf-wg-uuidrev/rfc4122bis",
       "baseRefName": "main",
       "baseRefOid": "de99e3f070a0247fdc872f72452d200494459a4b",
       "headRepository": "ietf-wg-uuidrev/rfc4122bis",
       "headRefName": "draft-01-merge-2",
       "headRefOid": "e248f379428def93985ab05a2393d569a45ec058",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2023-01-23T22:55:02Z",
+      "mergedAt": "2023-01-23T22:55:02Z",
+      "mergedBy": "kyzer-davis",
+      "mergeCommit": {
+        "oid": "40b48c5b048be16921872ff00cee720b6bec01ed"
+      },
       "comments": [],
       "reviews": []
     }
