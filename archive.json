@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-01-24T01:40:44.981999+00:00",
+  "timestamp": "2023-01-26T01:41:23.626017+00:00",
   "repo": "ietf-wg-uuidrev/rfc4122bis",
   "labels": [
     {
@@ -248,7 +248,7 @@
       "id": "I_kwDOH6Ln3M5TLOwe",
       "title": "Errata: Better Clarify network byte order when referencing most significant bits | 3546",
       "url": "https://github.com/ietf-wg-uuidrev/rfc4122bis/issues/12",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kyzer-davis",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -257,8 +257,8 @@
       ],
       "body": "### Errata ID: [3546](https://www.rfc-editor.org/errata/eid3546)\r\n- Status: Held for Document Update\r\n- Type: Technical\r\n- Publication Format(s) : TEXT\r\n- Reported By: Askar Safin\r\n- Date Reported: 2013-03-14\r\n- Held for Document Update by: Barry Leiba\r\n- Date Held: 2013-03-20\r\n\r\n### Errata\r\nSection 4.1.3 says:\r\n\r\n```\r\nThe version number is in the most significant 4 bits of the time\r\nstamp (bits 4 through 7 of the time_hi_and_version field).\r\n```\r\n\r\nIt should say:\r\n\r\n```\r\nThe version number is in the most significant 4 bits of the time\r\nstamp (bits 0 through 3 of the time_hi_and_version field).\r\n```\r\n\r\n### Notes:\r\n\r\nWe use network order (as far as I know, we use network order in this RFC both for bits and bytes). So, the most significant bits comes first and they are located in first bytes. So, 0 through 3.\r\n\r\n### VERIFIER NOTES\r\nThis erratum is correct as far as it goes, but, given other text in the RFC, so is erratum 1957. There is a pervasive problem in this RFC with inconsistent and unclear usage of bit numbering, which switches between several conventions. The diagram in Section 4.1.2 uses left-to-right bit numbering (the most significant bit is numbered 0), but much of the text (such as in Section 4.2.2) uses right-to-left bit numbering (the least significant bit is numbered 0). Most of the text uses big-ending byte order (network byte order), but some seems to assume little-ending, probably mistakes that come from the authors' familiarity with that convention.\r\n\r\nWith respect to the text in question, the first sentence of Section 4.1.3, we have the following situation:\r\n\r\n- The original text is correct if we assume right-to-left bit numbering and little-endian byte order.\r\n\r\n- Erratum 1957 is correct if we assume right-to-left bit numbering and big-endian byte order. This change also makes the first sentence of Section 4.1.3 consistent with the sixth bullet in Section 4.2.2.\r\n\r\n- Erratum 3546 is correct if we assume left-to-right bit numbering and big-endian byte order.\r\n\r\nIn the end, the real point is that this document needs a revision that carefully and thoroughly fixes every instance of byte numbering (or removes the byte numbering and refers only to \"most significant\" and \"least significant\"). Such a revision should also double-check the sample code in Appendix A to be sure it works in both big-ending and little-endian machines.\r\n\r\nHappily, it's not likely that misunderstandings here will cause actual interoperability problems: this isn't a situation where things need to be disassembled and reassembled. The algorithm merely turns a UUID into a URN, and the URN is thereafter a \"black box\", an unchanged identifier. The only issue would be whether different interpretations of the document would turn two different UUIDs into the same URN, and, given the number of bits involved, the likelihood of collisions in practice is small.",
       "createdAt": "2022-10-03T23:21:07Z",
-      "updatedAt": "2023-01-23T23:18:56Z",
-      "closedAt": null,
+      "updatedAt": "2023-01-25T20:12:11Z",
+      "closedAt": "2023-01-25T20:12:11Z",
       "comments": [
         {
           "author": "safinaskar",
@@ -273,6 +273,13 @@
           "body": "> So, I'm sure this errata (regarding this paragraph) is fixed. Thanks a lot.\r\n\r\nThanks for the confirmation @safinaskar \r\n\r\n> Also, it seems bits and bytes numbers are zero-based. I don't see mentions of this starting from begin of this document through this paragraph\r\n\r\nI have this paragraph in Section 5 (being moved to section 4). I believe when moved to the correct spot this should address your concern.\r\n\r\n```\r\nWhile discussing UUID field layouts, bit definitions start at 0 and end at 127 while octets definitions start at 0 and end at 15.\r\n```\r\nEdit, https://www.ietf.org/archive/id/draft-ietf-uuidrev-rfc4122bis-01.html#name-uuid-format\r\n",
           "createdAt": "2023-01-20T15:30:17Z",
           "updatedAt": "2023-01-23T23:18:56Z"
+        },
+        {
+          "author": "safinaskar",
+          "authorAssociation": "NONE",
+          "body": "> I believe when moved to the correct spot this should address your concern.\r\n\r\nYes, I see",
+          "createdAt": "2023-01-24T14:56:56Z",
+          "updatedAt": "2023-01-24T14:56:56Z"
         }
       ]
     },
@@ -306,7 +313,7 @@
       "labels": [],
       "body": "At the moment, the Nil-UUID is part of variant 0 and by that definition reserved. Variant 0 uses `AF_UNSPEC` in that case.\r\n\r\nHowever, the range of the Omni-UUID isn't reserved yet. This issue suggests to reserve a variant of the Omni-UUID. I would suggest to only reserve the `0xFF` variant. Why? I will explain.\r\n\r\nIn the early days of UUID, there was no such thing as variants. There was only \"family\". This family field consisted of only one single byte, so it ranged from 0 to 255. In modern days, this is the same byte as where the variant byte is in. With this information, the new variant table will be this:\r\n| Msb0 | Msb1 | Msb2 | As Byte | Values | Description |\r\n| - | - | - | - | - | - |\r\n| 0 | * | * | `0b0*******` | From 0 to 127 | Reserved, NCS backward compatibility. |\r\n| 1 | 0 | * | `0b10******` | From 128 to 191 | The variant specified in this document. |\r\n| 1 | 1 | 0 | `0b110*****` | From 192 to 223 | Reserved, Microsoft Corporation backward compatibility |\r\n| 1 | 1 | 1 | `0b111*****`<br>---<br>`0b11111111` | From 224 to 254<br>---<br>Only 255 | Reserved for future definition.<br>---<br>Omni-UUID variant |\r\n\r\nHandling the variant/family like this, it has at least 2 advantages:\r\n - It reserves a variant for the Omni-UUID, so that there will be no conflicts when a new variant will be specificed.\r\n - You clearly see that there are 31 variant slots open for definition (32 including Omni-UUID variant).\r\n\r\nThis doesn't mean that Variant 255 always should have all bits set to 1. It only reserves the range the Omni-UUID is in. I also think it is important to add this variant in this specification, because this specification defines the Omni-UUID itself.",
       "createdAt": "2022-10-21T13:41:59Z",
-      "updatedAt": "2023-01-23T23:44:12Z",
+      "updatedAt": "2023-01-24T20:56:05Z",
       "closedAt": null,
       "comments": [
         {
@@ -399,6 +406,13 @@
           "body": "@ben221199, maybe I can sneak Variant 0 and its sub-families into an appendix or I could link that source exactly as a reference.\r\nI would hate to add technical information we are not fully in control of. Basically treat it like UUIDv2m \"out of our control go to this doc to read about it.\" and insert the source.",
           "createdAt": "2023-01-23T21:12:35Z",
           "updatedAt": "2023-01-23T21:12:35Z"
+        },
+        {
+          "author": "ben221199",
+          "authorAssociation": "NONE",
+          "body": "I think an appendix would be okay for now. In that case, at least the variant is included in the RFC, so no linking to sources that can disappear in the future, but not part of the main specification. I'm cool with that.",
+          "createdAt": "2023-01-24T20:56:05Z",
+          "updatedAt": "2023-01-24T20:56:05Z"
         }
       ]
     },
